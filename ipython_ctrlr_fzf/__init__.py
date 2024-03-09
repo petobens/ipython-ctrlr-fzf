@@ -1,5 +1,6 @@
 from shutil import which
 import sys
+import os
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.filters import HasFocus, HasSelection
@@ -44,10 +45,16 @@ def _install_namespace(ipython):
         # refresh prompt
         print("", end="\r", flush=True)
         try:
+            if os.getenv('FZF_DEFAULT_OPTS'):
+                fzf_opts = os.getenv('FZF_DEFAULT_OPTS').replace("\n", " ")
+            else:
+                fzf_opts = (
+                    "--no-sort --multi --border --height=80% --margin=1 --padding=1"
+                )
             text = fzf.prompt(
                 history_strings,
-                fzf_options="--no-sort --multi --border --height=80% --margin=1 --padding=1"
-                f" --preview 'echo {{}} | sed \"s/ @@ /\\n/g\" | {preview_command}'",
+                fzf_options=fzf_opts
+                + f" --preview 'echo {{}} | sed \"s/ @@ /\\n/g\" | {preview_command}'",
             )
             # multiple returns get concatenated with an emtpy line in-between
             text = "\n\n".join(text)
